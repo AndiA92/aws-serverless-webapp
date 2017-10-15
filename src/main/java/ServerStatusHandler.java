@@ -15,20 +15,20 @@ import java.util.Map;
 
 @Log4j
 public class ServerStatusHandler
-        implements RequestHandler<Map<String, Object>, List<Server>> {
+        implements RequestHandler<Map<String, Object>, JSONElement> {
 
     private AmazonDynamoDB dynamoDb;
     private static final String TABLE_NAME = "servers";
     private static final List<String> ATTRIBUTES_TO_GET = Arrays.asList("host", "timestamp", "state", "pair");
     private static final String REGION = Regions.EU_CENTRAL_1.getName();
 
-    public List<Server> handleRequest(Map<String, Object> input, Context context) {
+    public JSONElement handleRequest(Map<String, Object> input, Context context) {
         this.initDynamoDbClient();
         return retrieveData();
     }
 
 
-    private List<Server> retrieveData() {
+    private JSONElement retrieveData() {
         ScanResult scan = dynamoDb.scan(TABLE_NAME, ATTRIBUTES_TO_GET);
         List<Server> servers = new ArrayList<>();
         List<Map<String, AttributeValue>> items = scan.getItems();
@@ -45,13 +45,12 @@ public class ServerStatusHandler
             Server server = new Server(host, timestamp, state, pair);
             servers.add(server);
         });
-        return servers;
+        return JSONElementBuilder.build(servers);
     }
 
     private void initDynamoDbClient() {
         AmazonDynamoDBClientBuilder amazonDynamoDBClientBuilder = AmazonDynamoDBClientBuilder.standard()
                                                                                              .withRegion(REGION);
         this.dynamoDb = amazonDynamoDBClientBuilder.build();
-        System.out.println("Initialized client");
     }
 }

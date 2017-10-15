@@ -28,4 +28,14 @@ public class Server {
     @Setter
     @Getter
     private String remoteEnd;
+
+    @Override
+    public String toString() {
+        return "Server{" +
+                "host='" + host + '\'' +
+                ", timestamp='" + timestamp + '\'' +
+                ", state='" + state + '\'' +
+                ", remoteEnd='" + remoteEnd + '\'' +
+                '}';
+    }
 }
