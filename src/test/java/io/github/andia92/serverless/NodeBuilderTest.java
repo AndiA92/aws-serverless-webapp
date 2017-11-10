@@ -11,8 +11,9 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
+import static io.github.andia92.serverless.ServerGenerator.generateServers;
+import static io.github.andia92.serverless.ServerGenerator.generateServersInAGroup;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -93,18 +94,5 @@ public class NodeBuilderTest {
         Assert.assertEquals(expectedGroups, new HashSet<>(actualGroups));
     }
 
-    private Map<String, List<Server>> generateServers(String name, int numberOfGroups, int numberOfServersPerGroup) {
-        return IntStream.range(0, numberOfGroups)
-                .boxed()
-                .collect(
-                        Collectors.toMap(
-                                groupIndex -> name + groupIndex,
-                                groupIndex -> generateServersInAGroup(name + groupIndex, numberOfServersPerGroup)));
-    }
 
-    private List<Server> generateServersInAGroup(String groupName, int nrOfServers) {
-        return IntStream.range(0, nrOfServers)
-                .mapToObj(serverIndex -> new Server(groupName, "localhost" + serverIndex, Long.toString(System.currentTimeMillis()), ServerState.NONE.getState(), "localhost" + serverIndex))
-                .collect(Collectors.toList());
-    }
 }

@@ -1,5 +1,6 @@
 package io.github.andia92.serverless;
 
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import java.util.*;
@@ -15,11 +16,7 @@ public class NodeBuilder implements Function<List<Server>, List<Group>> {
     private final BiFunction<String, List<Server>, Group> graphBuilder;
 
     @Override
-    public List<Group> apply(List<Server> servers) {
-        if (servers == null) {
-            throw new IllegalArgumentException("Server list can't be null!");
-        }
-
+    public List<Group> apply(@NonNull List<Server> servers) {
         final Map<String, List<Server>> serversByGroup = serverGrouper.apply(servers);
         return serversByGroup.entrySet()
                 .stream()
