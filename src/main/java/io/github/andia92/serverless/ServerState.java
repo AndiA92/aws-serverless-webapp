@@ -1,3 +1,5 @@
+package io.github.andia92.serverless;
+
 import lombok.Getter;
 
 import java.util.Arrays;
