@@ -1,4 +1,4 @@
-package io.github.andia92.serverless;
+package io.github.andia92.serverless.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-class Node {
+public class Node {
 
     @JsonProperty("name")
     private final String name;

@@ -7,6 +7,8 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.ScanResult;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
+import io.github.andia92.serverless.models.Node;
+import io.github.andia92.serverless.models.Server;
 import lombok.extern.log4j.Log4j;
 
 import java.util.*;
@@ -46,7 +48,7 @@ public class ServerStatusHandler
             Server server = new Server(group, host, timestamp, state, pair);
             servers.add(server);
         });
-        //return io.github.andia92.serverless.NodeBuilder.build(servers);
+        //return io.github.andia92.serverless.functions.NodeBuilder.build(servers);
         return Collections.emptyList();
     }
 

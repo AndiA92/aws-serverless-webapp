@@ -1,5 +1,8 @@
-package io.github.andia92.serverless;
+package io.github.andia92.serverless.functions;
 
+import io.github.andia92.serverless.models.Group;
+import io.github.andia92.serverless.models.Node;
+import io.github.andia92.serverless.models.Server;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,8 +15,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static io.github.andia92.serverless.ServerGenerator.generateServers;
-import static io.github.andia92.serverless.ServerGenerator.generateServersInAGroup;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -52,7 +53,7 @@ public class NodeBuilderTest {
     @Test
     public void applyAllServersInOneGroupReturnsOneGroup() throws Exception {
         final String groupName = "groupName";
-        final List<Server> servers = generateServersInAGroup(groupName, 5);
+        final List<Server> servers = ServerGenerator.generateServersInAGroup(groupName, 5);
         final Map<String, List<Server>> serversByGroup = new HashMap<>();
         serversByGroup.put(groupName, servers);
         when(serverGrouper.apply(servers)).thenReturn(serversByGroup);
@@ -70,7 +71,7 @@ public class NodeBuilderTest {
         String groupNames = "groupName";
         int nrOfGroups = 2;
         int nrOfServerPerGroup = 5;
-        final Map<String, List<Server>> servers = generateServers(groupNames, nrOfGroups, nrOfServerPerGroup);
+        final Map<String, List<Server>> servers = ServerGenerator.generateServers(groupNames, nrOfGroups, nrOfServerPerGroup);
 
         final List<Server> allServers = servers.values()
                 .stream()

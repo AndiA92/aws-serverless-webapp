@@ -1,4 +1,4 @@
-package io.github.andia92.serverless;
+package io.github.andia92.serverless.models;
 
 import lombok.Data;
 

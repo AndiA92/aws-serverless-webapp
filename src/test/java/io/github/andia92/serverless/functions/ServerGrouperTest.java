@@ -1,6 +1,7 @@
-package io.github.andia92.serverless;
+package io.github.andia92.serverless.functions;
 
 
+import io.github.andia92.serverless.models.Server;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

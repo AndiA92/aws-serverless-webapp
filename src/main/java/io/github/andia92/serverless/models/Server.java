@@ -1,11 +1,11 @@
-package io.github.andia92.serverless;
+package io.github.andia92.serverless.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 
 @Data
-class Server {
+public class Server {
 
     @JsonProperty("group")
     private final String group;
