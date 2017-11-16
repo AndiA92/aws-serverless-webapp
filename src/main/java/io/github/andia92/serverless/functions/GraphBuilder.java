@@ -2,17 +2,39 @@ package io.github.andia92.serverless.functions;
 
 
 import io.github.andia92.serverless.models.Group;
+import io.github.andia92.serverless.models.Node;
 import io.github.andia92.serverless.models.Server;
+import io.github.andia92.serverless.models.ServerLink;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
+import java.util.AbstractMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 public class GraphBuilder implements BiFunction<String, List<Server>, Group> {
+
+    private final LinkConstructor linkConstructor;
 
     @Override
     public Group apply(@NonNull String groupName, @NonNull List<Server> servers) {
-      return null;
+        List<Optional<ServerLink>> links = servers.stream()
+                                                  .map(server -> linkConstructor.apply(server, servers))
+                                                  .collect(Collectors.toList());
+        List<ServerLink> nonEmptyLinks = links.stream()
+                                              .filter(Optional::isPresent)
+                                              .map(Optional::get)
+                                              .collect(Collectors.toList());
+
+        Map<Server, List<ServerLink>> linkToChildrenMap = nonEmptyLinks.stream()
+                                                                       .collect(Collectors.groupingBy(ServerLink::getParent));
+
+        return null;
     }
 }
 

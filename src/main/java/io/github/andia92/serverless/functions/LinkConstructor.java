@@ -6,19 +6,21 @@ import io.github.andia92.serverless.ServerState;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 @AllArgsConstructor
-public class LinkConstructor implements Function<Server, Optional<ServerLink>> {
+public class LinkConstructor implements BiFunction<Server, List<Server>, Optional<ServerLink>> {
 
     private final ServerRetriever serverRetriever;
 
     @Override
-    public Optional<ServerLink> apply(@NonNull Server server) {
+    public Optional<ServerLink> apply(@NonNull Server server, @NonNull List<Server> servers) {
         final String state = server.getState();
         return remoteEndConnected(state) ?
-                serverRetriever.apply(server.getRemoteEnd())
+                serverRetriever.apply(server.getRemoteEnd(), servers)
                                .map(p -> new ServerLink(p, server))
                 : Optional.empty();
     }

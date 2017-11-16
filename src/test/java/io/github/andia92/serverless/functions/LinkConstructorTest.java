@@ -11,6 +11,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -25,6 +26,9 @@ public class LinkConstructorTest {
     @Mock
     private ServerRetriever serverRetriever;
 
+    @Mock
+    private List<Server> servers;
+
     @Before
     public void before() {
         linkConstructor = new LinkConstructor(serverRetriever);
@@ -32,7 +36,7 @@ public class LinkConstructorTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void applyNullServerThrowsException() {
-        linkConstructor.apply(null);
+        linkConstructor.apply(null, servers);
     }
 
     @Test
@@ -45,9 +49,9 @@ public class LinkConstructorTest {
         when(serverMock.getRemoteEnd()).thenReturn(parentHost);
         when(serverMock.getState()).thenReturn(ServerState.BOTH.getState());
 
-        when(serverRetriever.apply(parentHost)).thenReturn(Optional.of(parentMock));
+        when(serverRetriever.apply(parentHost, servers)).thenReturn(Optional.of(parentMock));
 
-        final Optional<ServerLink> actualParent = linkConstructor.apply(serverMock);
+        final Optional<ServerLink> actualParent = linkConstructor.apply(serverMock, servers);
         final ServerLink expectedLink = new ServerLink(parentMock, serverMock);
         Assert.assertTrue(actualParent.isPresent());
         Assert.assertEquals(expectedLink, actualParent.orElseThrow(RuntimeException::new));
@@ -63,9 +67,9 @@ public class LinkConstructorTest {
         when(serverMock.getRemoteEnd()).thenReturn(parentHost);
         when(serverMock.getState()).thenReturn(ServerState.NONE.getState());
 
-        when(serverRetriever.apply(parentHost)).thenReturn(Optional.of(parentMock));
+        when(serverRetriever.apply(parentHost, servers)).thenReturn(Optional.of(parentMock));
 
-        final Optional<ServerLink> actualParent = linkConstructor.apply(serverMock);
+        final Optional<ServerLink> actualParent = linkConstructor.apply(serverMock, servers);
         Assert.assertFalse(actualParent.isPresent());
     }
 
@@ -78,9 +82,9 @@ public class LinkConstructorTest {
         when(serverMock.getRemoteEnd()).thenReturn(unknown);
         when(serverMock.getState()).thenReturn(ServerState.BOTH.getState());
 
-        when(serverRetriever.apply(unknown)).thenReturn(Optional.empty());
+        when(serverRetriever.apply(unknown, servers)).thenReturn(Optional.empty());
 
-        final Optional<ServerLink> actualParent = linkConstructor.apply(serverMock);
+        final Optional<ServerLink> actualParent = linkConstructor.apply(serverMock, servers);
         Assert.assertFalse(actualParent.isPresent());
     }
 
@@ -93,9 +97,9 @@ public class LinkConstructorTest {
         when(serverMock.getRemoteEnd()).thenReturn(unknown);
         when(serverMock.getState()).thenReturn(ServerState.NONE.getState());
 
-        when(serverRetriever.apply(unknown)).thenReturn(Optional.empty());
+        when(serverRetriever.apply(unknown, servers)).thenReturn(Optional.empty());
 
-        final Optional<ServerLink> actualParent = linkConstructor.apply(serverMock);
+        final Optional<ServerLink> actualParent = linkConstructor.apply(serverMock, servers);
         Assert.assertFalse(actualParent.isPresent());
     }
 }
