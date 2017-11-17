@@ -8,18 +8,18 @@ import com.amazonaws.services.dynamodbv2.model.ScanResult;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import io.github.andia92.serverless.factory.GroupBuilderFactory;
-import io.github.andia92.serverless.functions.GraphBuilder;
 import io.github.andia92.serverless.functions.GroupBuilder;
-import io.github.andia92.serverless.functions.ServerGrouper;
 import io.github.andia92.serverless.functions.ServerListBuilder;
 import io.github.andia92.serverless.models.Group;
-import io.github.andia92.serverless.models.Node;
 import io.github.andia92.serverless.models.Server;
 import lombok.extern.log4j.Log4j;
+import org.json.JSONObject;
 
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.function.Function;
+
+import static spark.Spark.post;
+
 
 @Log4j
 public class ServerStatusHandler
@@ -41,11 +41,22 @@ public class ServerStatusHandler
         this.dynamoDb = amazonDynamoDBClientBuilder.build();
     }
 
+    public static void main(String[] args) {
+        List<String> groups = Collections.singletonList("a");
+        post("http://localhost:4567/chat", (req, res) ->
+                new JSONObject("hello")
+        );
+    }
+
     private List<Group> retrieveData() {
         ScanResult scan = dynamoDb.scan(TABLE_NAME, ATTRIBUTES_TO_GET);
         Function<List<Map<String, AttributeValue>>, List<Server>> serverListBuilder = new ServerListBuilder();
         List<Server> servers = serverListBuilder.apply(scan.getItems());
         GroupBuilder builder = GroupBuilderFactory.getInstance();
-        return builder.apply(servers);
+
+        List<Group> groups = builder.apply(servers);
+        post("/servers", (req, res) -> new JSONObject(groups));
+
+        return groups;
     }
 }
