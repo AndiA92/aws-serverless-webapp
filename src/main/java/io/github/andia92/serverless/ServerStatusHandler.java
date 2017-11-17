@@ -11,6 +11,7 @@ import io.github.andia92.serverless.factory.GroupBuilderFactory;
 import io.github.andia92.serverless.functions.GraphBuilder;
 import io.github.andia92.serverless.functions.GroupBuilder;
 import io.github.andia92.serverless.functions.ServerGrouper;
+import io.github.andia92.serverless.functions.ServerListBuilder;
 import io.github.andia92.serverless.models.Group;
 import io.github.andia92.serverless.models.Node;
 import io.github.andia92.serverless.models.Server;
@@ -42,24 +43,8 @@ public class ServerStatusHandler
 
     private List<Group> retrieveData() {
         ScanResult scan = dynamoDb.scan(TABLE_NAME, ATTRIBUTES_TO_GET);
-        List<Server> servers = new ArrayList<>();
-        List<Map<String, AttributeValue>> items = scan.getItems();
-        items.forEach(item -> {
-            AttributeValue groupAttribute = item.get("group");
-            AttributeValue hostAttribute = item.get("host");
-            AttributeValue timestampAttribute = item.get("timestamp");
-            AttributeValue stateAttribute = item.get("state");
-            AttributeValue pairAttribute = item.get("pair");
-
-            String group = groupAttribute == null ? null : groupAttribute.getS();
-            String host = hostAttribute == null ? null : hostAttribute.getS();
-            String timestamp = timestampAttribute == null ? null : timestampAttribute.getN();
-            String state = stateAttribute == null ? null : stateAttribute.getS();
-            String pair = pairAttribute == null ? null : pairAttribute.getS();
-            Server server = new Server(group, host, timestamp, state, pair);
-            servers.add(server);
-        });
-
+        Function<List<Map<String, AttributeValue>>, List<Server>> serverListBuilder = new ServerListBuilder();
+        List<Server> servers = serverListBuilder.apply(scan.getItems());
         GroupBuilder builder = GroupBuilderFactory.getInstance();
         return builder.apply(servers);
     }

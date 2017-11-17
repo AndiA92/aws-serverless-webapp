@@ -16,12 +16,4 @@ public enum ServerState {
     ServerState(String state) {
         this.state = state;
     }
-
-    public static ServerState getStateByName(String name) {
-        return Arrays.stream(ServerState.values())
-                     .filter(state -> state.getState()
-                                           .equals(name))
-                     .findFirst()
-                     .orElseGet(null);
-    }
 }
