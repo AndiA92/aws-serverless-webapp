@@ -14,15 +14,15 @@ import java.util.function.Function;
 @AllArgsConstructor
 public class LinkConstructor implements BiFunction<Server, List<Server>, Optional<ServerLink>> {
 
-    private final ServerRetriever serverRetriever;
+    private final BiFunction<String, List<Server>, Optional<Server>> serverRetriever;
 
     @Override
     public Optional<ServerLink> apply(@NonNull Server server, @NonNull List<Server> servers) {
         final String state = server.getState();
         return remoteEndConnected(state) ?
                 serverRetriever.apply(server.getRemoteEnd(), servers)
-                               .map(p -> new ServerLink(p, server))
-                : Optional.empty();
+                               .map(parent -> new ServerLink(server, parent))
+                : (server.getRemoteEnd() == null) ? Optional.of(new ServerLink(server)) : Optional.empty();
     }
 
     private boolean remoteEndConnected(String state) {

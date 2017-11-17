@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -27,7 +27,7 @@ public class ServerRetrieverTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void retrieveServerFromNulListThrowsException() {
-        retriever.apply(anyObject(), null);
+        retriever.apply("", null);
     }
 
     @Test
@@ -37,13 +37,6 @@ public class ServerRetrieverTest {
         Assert.assertTrue(actualServer.isPresent());
         final Server expectedServer = servers.get(1);
         Assert.assertEquals(expectedServer, actualServer.get());
-    }
-
-    @Test
-    public void retrieveNullServer_ReturnsEmpty() {
-        String serverName = null;
-        final Optional<Server> actualServer = retriever.apply(serverName, servers);
-        Assert.assertFalse(actualServer.isPresent());
     }
 
     @Test

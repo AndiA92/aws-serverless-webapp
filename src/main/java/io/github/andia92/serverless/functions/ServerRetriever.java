@@ -14,7 +14,6 @@ public class ServerRetriever implements BiFunction<String, List<Server>, Optiona
     public Optional<Server> apply(String serverName, @NonNull List<Server> servers) {
         return servers.stream()
                       .filter(server -> server.getHost().equals(serverName))
-                      .findFirst()
-                      .map(server -> server);
+                      .findFirst();
     }
 }

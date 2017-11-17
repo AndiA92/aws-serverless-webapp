@@ -8,71 +8,63 @@ import io.github.andia92.serverless.models.ServerLink;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class GraphBuilder implements BiFunction<String, List<Server>, Group> {
 
-    private final LinkConstructor linkConstructor;
+    private final BiFunction<Server, List<Server>, Optional<ServerLink>> linkConstructor;
 
     @Override
     public Group apply(@NonNull String groupName, @NonNull List<Server> servers) {
         List<Optional<ServerLink>> links = servers.stream()
                                                   .map(server -> linkConstructor.apply(server, servers))
                                                   .collect(Collectors.toList());
+
         List<ServerLink> nonEmptyLinks = links.stream()
                                               .filter(Optional::isPresent)
                                               .map(Optional::get)
                                               .collect(Collectors.toList());
 
-        Map<Server, List<ServerLink>> linkToChildrenMap = nonEmptyLinks.stream()
-                                                                       .collect(Collectors.groupingBy(ServerLink::getParent));
+        Map<String, Node> nodes = nonEmptyLinks.stream()
+                                               .map(link -> {
+                                                   String currentNodeHost = link.getNode().getHost();
+                                                   if (link.getParent() == null) {
+                                                       return new Node(currentNodeHost);
+                                                   } else {
+                                                       return new Node(currentNodeHost, link.getParent().getHost());
+                                                   }
+                                               })
+                                               .collect(Collectors.toMap(Node::getName, node -> node));
 
-        return null;
+
+        setChildren(nodes);
+        Optional<Node> root = getRootNode(nodes);
+
+        return new Group(groupName, root.orElseThrow(() -> new IllegalArgumentException("Could not create group: " + groupName)));
+    }
+
+    private void setChildren(Map<String, Node> nodes) {
+        nodes.values()
+             .forEach(node -> {
+                 String nameOfParent = node.getParent();
+                 if (nameOfParent != null) {
+                     Node parentNode = nodes.get(nameOfParent);
+                     if (parentNode != null) {
+                         parentNode.addChild(node);
+                     }
+                 }
+             });
+    }
+
+    private Optional<Node> getRootNode(Map<String, Node> nodes) {
+        return nodes.values()
+                    .stream()
+                    .filter(node -> node.getParent() == null)
+                    .findFirst();
     }
 }
-
-
-// /   static io.github.andia92.serverless.models.Node build(List<io.github.andia92.serverless.Server> servers) {
-//        Map<io.github.andia92.serverless.Server, io.github.andia92.serverless.models.Node> elements = new HashMap<>();
-//        Map<String, io.github.andia92.serverless.Server> hostNameServerMapping = new HashMap<>();
-//        servers.forEach(server -> {
-//            io.github.andia92.serverless.models.Node jsonElement = new io.github.andia92.serverless.models.Node();
-//            jsonElement.setName(server.getHost());
-//            elements.put(server, jsonElement);
-//            hostNameServerMapping.put(server.getHost(), server);
-//        });
-//        elements.entrySet().forEach(entry -> {
-//            io.github.andia92.serverless.Server server = entry.getKey();
-//            io.github.andia92.serverless.models.Node element = entry.getValue();
-//            io.github.andia92.serverless.ServerState serverState = io.github.andia92.serverless.ServerState.getStateByName(server.getState());
-//
-//            switch (serverState) {
-//                case REMOTE:
-//                case BOTH:
-//                    element.setParent(server.getRemoteEnd());
-//                    break;
-//            }
-//        });
-//
-//        elements.values().forEach(element -> {
-//            String parentElementName = element.getParent();
-//            if (parentElementName != null) {
-//                io.github.andia92.serverless.Server parentServer = hostNameServerMapping.get(parentElementName);
-//                io.githƒcub.andia92.serverless.Node parentJsonElement = elements.get(parentServer);
-//                parentJsonElement.setChildren(Collections.singletonList(element));
-//            }
-//        });
-//
-//        return elements.values()
-//                       .stream()
-//                       .filter(element -> element.getParent() == null)
-//                       .findFirst()
-//                       .orElseGet(null);
-//    }

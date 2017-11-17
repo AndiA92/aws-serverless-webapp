@@ -22,7 +22,7 @@ import static org.mockito.Mockito.when;
 
 
 @RunWith(MockitoJUnitRunner.class)
-public class NodeBuilderTest {
+public class GroupBuilderTest {
 
     @Mock
     private Function<List<Server>, Map<String, List<Server>>> serverGrouper;
@@ -30,11 +30,11 @@ public class NodeBuilderTest {
     @Mock
     private BiFunction<String, List<Server>, Group> graphBuilder;
 
-    private NodeBuilder builder;
+    private GroupBuilder builder;
 
     @Before
     public void before() {
-        builder = new NodeBuilder(serverGrouper, graphBuilder);
+        builder = new GroupBuilder(serverGrouper, graphBuilder);
     }
 
     @Test(expected = IllegalArgumentException.class)

@@ -52,7 +52,7 @@ public class LinkConstructorTest {
         when(serverRetriever.apply(parentHost, servers)).thenReturn(Optional.of(parentMock));
 
         final Optional<ServerLink> actualParent = linkConstructor.apply(serverMock, servers);
-        final ServerLink expectedLink = new ServerLink(parentMock, serverMock);
+        final ServerLink expectedLink = new ServerLink(serverMock, parentMock);
         Assert.assertTrue(actualParent.isPresent());
         Assert.assertEquals(expectedLink, actualParent.orElseThrow(RuntimeException::new));
     }

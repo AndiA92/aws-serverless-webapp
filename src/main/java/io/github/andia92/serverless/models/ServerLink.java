@@ -1,11 +1,23 @@
 package io.github.andia92.serverless.models;
 
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
-@Data
+@EqualsAndHashCode
 public class ServerLink {
 
-    private final Server parent;
+    @Getter
+    private final Server node;
 
-    private final Server child;
+    @Getter
+    private Server parent;
+
+    public ServerLink(Server node) {
+        this.node = node;
+    }
+
+    public ServerLink(Server node, Server parent) {
+        this.node = node;
+        this.parent = parent;
+    }
 }

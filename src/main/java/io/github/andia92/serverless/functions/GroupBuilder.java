@@ -11,7 +11,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
-public class NodeBuilder implements Function<List<Server>, List<Group>> {
+public class GroupBuilder implements Function<List<Server>, List<Group>> {
 
     private final Function<List<Server>, Map<String, List<Server>>> serverGrouper;
 
