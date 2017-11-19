@@ -7,49 +7,40 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.ScanResult;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-import io.github.andia92.serverless.models.Node;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.andia92.serverless.factory.GroupBuilderFactory;
+import io.github.andia92.serverless.functions.GroupBuilder;
+import io.github.andia92.serverless.functions.ServerListBuilder;
+import io.github.andia92.serverless.models.Group;
 import io.github.andia92.serverless.models.Server;
 import lombok.extern.log4j.Log4j;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClientBuilder;
 
+import java.io.IOException;
 import java.util.*;
+import java.util.function.Function;
+
 
 @Log4j
 public class ServerStatusHandler
-        implements RequestHandler<Map<String, Object>, List<Node>> {
+        implements RequestHandler<Map<String, Object>, String> {
 
     private AmazonDynamoDB dynamoDb;
     private static final String TABLE_NAME = "servers";
     private static final List<String> ATTRIBUTES_TO_GET = Arrays.asList("group", "host", "timestamp", "state", "pair");
     private static final String REGION = Regions.EU_CENTRAL_1.getName();
 
-    public List<Node> handleRequest(Map<String, Object> input, Context context) {
+    public String handleRequest(Map<String, Object> input, Context context) {
         this.initDynamoDbClient();
-        return retrieveData();
-    }
-
-
-    private List<Node> retrieveData() {
-        ScanResult scan = dynamoDb.scan(TABLE_NAME, ATTRIBUTES_TO_GET);
-        List<Server> servers = new ArrayList<>();
-        Map<String, Node> result = new HashMap<>();
-        List<Map<String, AttributeValue>> items = scan.getItems();
-        items.forEach(item -> {
-            AttributeValue groupAttribute = item.get("group");
-            AttributeValue hostAttribute = item.get("host");
-            AttributeValue timestampAttribute = item.get("timestamp");
-            AttributeValue stateAttribute = item.get("state");
-            AttributeValue pairAttribute = item.get("pair");
-
-            String group = groupAttribute == null ? null : groupAttribute.getS();
-            String host = hostAttribute == null ? null : hostAttribute.getS();
-            String timestamp = timestampAttribute == null ? null : timestampAttribute.getN();
-            String state = stateAttribute == null ? null : stateAttribute.getS();
-            String pair = pairAttribute == null ? null : pairAttribute.getS();
-            Server server = new Server(group, host, timestamp, state, pair);
-            servers.add(server);
-        });
-        //return io.github.andia92.serverless.functions.NodeBuilder.build(servers);
-        return Collections.emptyList();
+        try {
+            return retrieveData();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void initDynamoDbClient() {
@@ -57,4 +48,28 @@ public class ServerStatusHandler
                                                                                              .withRegion(REGION);
         this.dynamoDb = amazonDynamoDBClientBuilder.build();
     }
+
+    private String retrieveData() throws IOException {
+        ScanResult scan = dynamoDb.scan(TABLE_NAME, ATTRIBUTES_TO_GET);
+        Function<List<Map<String, AttributeValue>>, List<Server>> serverListBuilder = new ServerListBuilder();
+        List<Server> servers = serverListBuilder.apply(scan.getItems());
+        GroupBuilder builder = GroupBuilderFactory.getInstance();
+
+        List<Group> groups = builder.apply(servers);
+
+        ObjectMapper mapper = new ObjectMapper();
+        String json = mapper.writeValueAsString(groups);
+
+        System.out.println("json: " + json);
+
+        HttpClient client = HttpClientBuilder.create().build();
+        String url = "http://<ip>/servers";
+        HttpPost post = new HttpPost(url);
+        post.setEntity(new StringEntity(json));
+        client.execute(post);
+
+        return json;
+    }
+
+
 }

@@ -1,19 +1,28 @@
 package io.github.andia92.serverless.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
+import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
-@Data
+@AllArgsConstructor
+@RequiredArgsConstructor
 public class Node {
 
     @JsonProperty("name")
+    @Getter
     private final String name;
 
     @JsonProperty("parent")
-    private final String parent;
+    @Getter
+    private String parent;
 
     @JsonProperty("children")
-    private final List<Node> children;
+    @Getter
+    private final List<Node> children = new ArrayList<>();
+
+    public void addChild(Node node) {
+        children.add(node);
+    }
 }
